@@ -1,0 +1,38 @@
+version: "3.9"
+services:
+  mongo:
+    image: mongo:6
+    container_name: helpdesk-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  api:
+    build: ./api
+    container_name: helpdesk-api
+    restart: always
+    ports:
+      - "4000:4000"
+    environment:
+      PORT: 4000
+      MONGO_URI: mongodb://mongo:27017/helpdesk
+      JWT_SECRET: change-me
+      AUTOCLOSEENABLED: true
+      CONFIDENCETHRESHOLD: 0.78
+      _STUBMODE: true
+    depends_on:
+      - mongo
+
+  client:
+    build: ./client
+    container_name: helpdesk-client
+    restart: always
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo-data:
